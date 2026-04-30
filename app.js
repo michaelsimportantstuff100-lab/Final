@@ -1,9 +1,11 @@
-let counts = [0, 0, 0];
+let ratings = [0, 0, 0];
+let votes = [0, 0, 0];
 
+// hardcoded images (NO fetch = no failure point)
 const images = [
-"https://picsum.photos/400/250?1",
-"https://picsum.photos/400/250?2",
-"https://picsum.photos/400/250?3"
+{ title: "Neon Night", url: "https://picsum.photos/400/250?1" },
+{ title: "Mountain View", url: "https://picsum.photos/400/250?2" },
+{ title: "City Lights", url: "https://picsum.photos/400/250?3" }
 ];
 
 // ---------- BUILD PAGE ----------
@@ -16,13 +18,16 @@ card.className = "photo";
 
 ```
 card.innerHTML = `
-  <img src="${img}">
-  <p>Image ${index + 1}</p>
+  <img src="${img.url}">
+  <p>${img.title}</p>
 
-  <p id="count${index}">Clicks: 0</p>
+  <p id="rating${index}">Avg: 0 (Votes: 0)</p>
 
-  <button onclick="addClick(${index})">Click Me</button>
-  <button onclick="resetClick(${index})">Reset</button>
+  <button onclick="rate(${index},1)">1</button>
+  <button onclick="rate(${index},2)">2</button>
+  <button onclick="rate(${index},3)">3</button>
+  <button onclick="rate(${index},4)">4</button>
+  <button onclick="rate(${index},5)">5</button>
 `;
 
 gallery.appendChild(card);
@@ -31,36 +36,39 @@ gallery.appendChild(card);
 });
 }
 
-// ---------- VARIABLES + DOM UPDATE ----------
-function addClick(i) {
-counts[i]++;
-update(i);
-}
-
-function resetClick(i) {
-counts[i] = 0;
+// ---------- CORE FUNCTIONALITY ----------
+function rate(i, score) {
+ratings[i] += score;
+votes[i]++;
 update(i);
 }
 
 function update(i) {
-document.getElementById("count" + i).innerText =
-"Clicks: " + counts[i];
+const avg = votes[i] === 0 ? 0 : (ratings[i] / votes[i]).toFixed(1);
+
+document.getElementById("rating" + i).innerText =
+`Avg: ${avg} (Votes: ${votes[i]})`;
 }
 
-// ---------- “AJAX STYLE” STORAGE ----------
+// ---------- SAVE / LOAD (safe AJAX substitute) ----------
 function saveData() {
-localStorage.setItem("clickData", JSON.stringify(counts));
+localStorage.setItem("ratings", JSON.stringify(ratings));
+localStorage.setItem("votes", JSON.stringify(votes));
 alert("Saved!");
 }
 
 function loadData() {
-const data = JSON.parse(localStorage.getItem("clickData"));
+const r = JSON.parse(localStorage.getItem("ratings"));
+const v = JSON.parse(localStorage.getItem("votes"));
 
-if (!data) return alert("No saved data");
+if (!r || !v) return alert("No saved data");
 
-counts = data;
+ratings = r;
+votes = v;
 
-counts.forEach((_, i) => update(i));
+images.forEach((_, i) => update(i));
+
+alert("Loaded!");
 }
 
 // ---------- START ----------
