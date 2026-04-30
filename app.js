@@ -1,84 +1,67 @@
-let ratings = [];
-let votes = [];
-let images = [];
+let counts = [0, 0, 0];
 
-// ---------- LOAD DATA (AJAX) ----------
-fetch("data.json")
-.then(res => res.json())
-.then(data => {
-images = data;
-initialize();
-})
-.catch(err => console.error("Error loading JSON:", err));
+const images = [
+"https://picsum.photos/400/250?1",
+"https://picsum.photos/400/250?2",
+"https://picsum.photos/400/250?3"
+];
 
-// ---------- BUILD GALLERY ----------
-function initialize() {
+// ---------- BUILD PAGE ----------
+function init() {
 const gallery = document.getElementById("gallery");
 
 images.forEach((img, index) => {
-ratings[index] = 0;
-votes[index] = 0;
+const card = document.createElement("div");
+card.className = "photo";
 
 ```
-const div = document.createElement("div");
-div.className = "photo";
+card.innerHTML = `
+  <img src="${img}">
+  <p>Image ${index + 1}</p>
 
-div.innerHTML = ` <img src="${img.url}" alt="${img.title}">
+  <p id="count${index}">Clicks: 0</p>
 
-<p>${img.title}</p>
-<p id="rating${index}">Avg: 0 (Votes: 0)</p>
-
-<div class="buttons">
-  <button onclick="rateImage(${index},1)">1</button>
-  <button onclick="rateImage(${index},2)">2</button>
-  <button onclick="rateImage(${index},3)">3</button>
-  <button onclick="rateImage(${index},4)">4</button>
-  <button onclick="rateImage(${index},5)">5</button>
-</div>
+  <button onclick="addClick(${index})">Click Me</button>
+  <button onclick="resetClick(${index})">Reset</button>
 `;
 
-
-gallery.appendChild(div);
+gallery.appendChild(card);
 ```
 
 });
 }
 
-// ---------- INTERACTION (DOM + VARIABLES) ----------
-function rateImage(index, score) {
-ratings[index] += score;
-votes[index]++;
-
-updateDisplay(index);
+// ---------- VARIABLES + DOM UPDATE ----------
+function addClick(i) {
+counts[i]++;
+update(i);
 }
 
-function updateDisplay(index) {
-const avg = votes[index] === 0 ? 0 : (ratings[index] / votes[index]).toFixed(1);
-
-document.getElementById("rating" + index).innerText =
-`Avg: ${avg} (Votes: ${votes[index]})`;
+function resetClick(i) {
+counts[i] = 0;
+update(i);
 }
 
-// ---------- SAVE (localStorage = pseudo AJAX write) ----------
-document.getElementById("saveBtn").addEventListener("click", () => {
-const data = { ratings, votes };
-localStorage.setItem("photoRatings", JSON.stringify(data));
-alert("Ratings saved!");
-});
-
-// ---------- LOAD (pseudo AJAX read) ----------
-document.getElementById("loadBtn").addEventListener("click", () => {
-const saved = JSON.parse(localStorage.getItem("photoRatings"));
-
-if (!saved) {
-alert("No saved data found.");
-return;
+function update(i) {
+document.getElementById("count" + i).innerText =
+"Clicks: " + counts[i];
 }
 
-ratings = saved.ratings;
-votes = saved.votes;
+// ---------- “AJAX STYLE” STORAGE ----------
+function saveData() {
+localStorage.setItem("clickData", JSON.stringify(counts));
+alert("Saved!");
+}
 
-images.forEach((_, index) => updateDisplay(index));
+function loadData() {
+const data = JSON.parse(localStorage.getItem("clickData"));
 
-alert("Ratings loaded!");
-});
+if (!data) return alert("No saved data");
+
+counts = data;
+
+counts.forEach((_, i) => update(i));
+}
+
+// ---------- START ----------
+init();
