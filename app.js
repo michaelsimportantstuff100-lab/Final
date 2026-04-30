@@ -21,8 +21,8 @@ votes[index] = 0;
 const div = document.createElement("div");
 div.className = "photo";
 
-div.innerHTML = `
-  <img src="${img.url}">
+div.innerHTML = ` <img src="${img.url}" alt="photo">
+
   <p>${img.title}</p>
   <p id="rating${index}">Avg: 0 (Votes: 0)</p>
   <div>
@@ -33,6 +33,7 @@ div.innerHTML = `
     <button onclick="rateImage(${index},5)">5</button>
   </div>
 `;
+
 
 gallery.appendChild(div);
 ```
